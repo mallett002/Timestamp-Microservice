@@ -1,30 +1,32 @@
-// server.js
-// where your node app starts
-
-// init project
 var express = require('express');
 var app = express();
+const getTime = require('./getTime');
 
 var cors = require('cors');
 app.use(cors({optionSuccessStatus: 200}));  // some legacy browsers choke on 204
 
-// http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 
-// http://expressjs.com/en/starter/basic-routing.html
+// Serve the html file
 app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+// API that responds at path "/:time"
+app.get("/:time", (req, res) => {
+  const inputTime = req.params.time;
+  res.json(getTime(inputTime));
 });
 
+// Start the server
+const port = process.env.PORT || 8000;
 
+app.listen(port, () => {
+  console.log(`App listening on port ${port}!`);
+});
 
-// listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+// middleware for handeling errors
+app.use('/', (err, req, res, next) => {
+  console.log('uh oh...something broke');
+  res.sendStatus(err.status || 500);
 });
